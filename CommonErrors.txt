@@ -1,4 +1,4 @@
-If the error log has `COM` in it it is an ANSYS error. Look for it directly in HFSS.
+- If the error log has `COM` in it it is an ANSYS error. Look for it directly in HFSS.
 
-Make sure ANSYS is open before running your code, and it is better if only your project is open during the run.
+- Make sure ANSYS is open before running your code. It is also better if your project is the only one open during the run.
 
