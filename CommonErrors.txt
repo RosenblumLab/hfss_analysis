@@ -2,3 +2,5 @@
 
 - Make sure ANSYS is open before running your code. It is also better if your project is the only one open during the run.
 
+- Sometimes when you sweep over the parameter the "variations" varibale will have older variations stored. You can avoid that by cleaning up the old solutions in HFSS (under the "Results" tab) before running a sweep script.
+
