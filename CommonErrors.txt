@@ -4,3 +4,4 @@
 
 - Sometimes when you sweep over the parameter the "variations" varibale will have older variations stored. You can avoid that by cleaning up the old solutions in HFSS (under the "Results" tab) before running a sweep script.
 
+- Sweeping using an HFSS project that is saved in Dropbox sometimes crashes due to synchronization issues. Try to download it and run locally instead.
