@@ -5,3 +5,5 @@
 - Sometimes when you sweep over the parameter the "variations" varibale will have older variations stored. You can avoid that by cleaning up the old solutions in HFSS (under the "Results" tab) before running a sweep script.
 
 - Sweeping using an HFSS project that is saved in Dropbox sometimes crashes due to synchronization issues. Try to download it and run locally instead.
+
+- When the modes you are analyzing are not consecutive pyEPR does not handle it well (as of 05/10/2021). The code needs to be changed a bit using temp_modes - modes trick. Ask Uri/Barkay/Ofir.
