@@ -111,7 +111,10 @@ class Project:
         return self.pinfo.design.get_setup(setup_name)
 
     def set_variable(self, name: str, value: str):
-        self.pinfo.project.set_variable(name, value)
+        if name.startswith('$'):
+            self.pinfo.project.set_variable(name, value)
+        else:
+            self.pinfo.design.set_variable(name, value)
 
     def get_variable_value(self, name: str) -> str:
         return self.pinfo.project.get_variable_value(name)
