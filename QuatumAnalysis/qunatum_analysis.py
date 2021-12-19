@@ -278,13 +278,18 @@ class Sweep:
         # getting chi matrix
         self.simulation.make_quantum()
 
-    def make_all(self):
+    def make_all(self, do_quantum=True):
         # making simulations
         self.make_classic()
-        self.make_quantum()
 
-        # getting results
-        self.results = self.simulation.concat_eigenmodes_and_chi()
+        if do_quantum:
+            self.make_quantum()
+
+            # getting results
+            self.results = self.simulation.concat_eigenmodes_and_chi()
+
+        else:
+            self.results = self.simulation.eigenmodes
 
         # adding parameters
         self.add_parameters(self.results)
