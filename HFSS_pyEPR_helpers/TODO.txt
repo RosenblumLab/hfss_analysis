@@ -1,0 +1,2 @@
+- Add ND_freqs to the results DataFrame whenever quantum analysis has been used
+- chi matrix: set the column name to correspond to the actual mode name and not the order in which they appear in the format_dict

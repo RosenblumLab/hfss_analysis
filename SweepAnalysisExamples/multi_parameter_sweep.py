@@ -1,3 +1,10 @@
+"""
+Original author: Barkay
+
+Consider using the `quantum_analysis` module written by Uri
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
