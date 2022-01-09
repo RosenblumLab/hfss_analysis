@@ -197,8 +197,8 @@ class HFSSproject:
         :param metal_surfaces: list of strings with the names of the metal surfaces on which the dielectrics reside.
         :param substrate: string with the name of the substrate (chip) on which the metal sheets are placed.
         :param loss_tangents: dictionary with the three relevant surface loss tangents, e.g.
-        loss_tangents=dict(tan_MA=2.1 * 1e-2, tan_MS=2.6 * 1e-3, tan_SA=2.2 * 1e-3), which is an upper bound according
-        to the reference mentioned above.
+        loss_tangents=dict(tan_MA=2.1 * 1e-2, tan_MS=2.6 * 1e-3, tan_SA=2.2 * 1e-3), which is an *upper bound* according
+        to the reference mentioned above, Supplementary Material BIII.
 
         :return factors: a list with the G and F factors of the modes, alternately.
         '''
