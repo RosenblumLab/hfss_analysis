@@ -124,6 +124,9 @@ class Project:
     pinfo: epr.Project_Info = field(init=False)
 
     def __post_init__(self):
+        self.open()
+
+    def open(self):
         self.pinfo = epr.Project_Info(project_path=self.project_directory,
                                       project_name=self.project_name,
                                       design_name=self.design_name)
@@ -186,6 +189,7 @@ class Simulation:
     setup_name: str
     format_dict: Dict[str, int] = None
     junctions: Dict[str, Dict[str, str]] = None
+    quality_factors: Dict[str, Dict[str, float]] = field(default_factory=dict)
     eigenmodes: pd.DataFrame = field(default_factory=pd.DataFrame)
     chi_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
     ND_freqs: pd.DataFrame = field(default_factory=pd.DataFrame)  # Frequencies from numerical diagonalization
@@ -199,6 +203,7 @@ class Simulation:
         self.eigenmodes = pd.DataFrame()
         self.chi_matrix = pd.DataFrame()
         self.ND_freqs = pd.DataFrame()
+        self.quality_factors = {}
 
     def analyze_classic(self):
         # analysing
