@@ -55,7 +55,7 @@ def get_quality_factor(simulation, design_name=None, modes=[0], quality_factor_n
 
     return
 
-def calculate_seam_loss(simulation: Simulation, g_seam, seam_line, volume):
+def calculate_seam_loss(simulation: Simulation, seam_line: str, volume: str, g_seam: float=1e6):
     '''
     Here we use the equation
     $$\dfrac{1}{Q_{\text{seam}}} = \dfrac{L}{G_{\text{seam}}} \left[\dfrac{\int _{\text{seam}}
@@ -64,7 +64,7 @@ def calculate_seam_loss(simulation: Simulation, g_seam, seam_line, volume):
     See Brecht's thesis.
 
     :param simulation: quantum_analysis.Simulation object, already analyzed.
-    :param g_seam: value for the g_seam. Indium gives 1e6.
+    :param g_seam: value for the g_seam. Indium gives more than 1e6.
     :param seam_line: string with the name of the seam line in HFSS.
     :param volume: string with the name of the volume in which the EM field lives in HFSS.
 

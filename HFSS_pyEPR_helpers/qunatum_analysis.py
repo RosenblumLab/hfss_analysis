@@ -10,6 +10,7 @@ import pyEPR as epr
 from itertools import product, combinations
 from dataclasses import dataclass, field
 from typing import List, Iterable, Union, Dict, Tuple
+from tqdm import tqdm
 
 QF = 'Quality Factor'
 FREQ = 'Freq. (GHz)'
@@ -189,6 +190,7 @@ class Simulation:
     setup_name: str
     format_dict: Dict[str, int] = None
     junctions: Dict[str, Dict[str, str]] = None
+    results: pd.DataFrame = None
     quality_factors: Dict[str, Dict[str, float]] = field(default_factory=dict)
     eigenmodes: pd.DataFrame = field(default_factory=pd.DataFrame)
     chi_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
@@ -270,9 +272,18 @@ class Simulation:
         # parsing eigenmodes according to the format dict
         return pd.concat([self.eigenmodes, self.chi_matrix, self.ND_freqs], axis=1)
 
-    def make_all(self):
+    def make_all(self, do_quantum=True):
         self.make_classic()
-        self.make_quantum()
+        
+        if do_quantum:
+            self.make_quantum()
+
+            # getting results
+            self.results = self.concat_eigenmodes_chi_and_ND_freqs()
+
+        else:
+            self.results = self.eigenmodes
+            
         return self.concat_eigenmodes_chi_and_ND_freqs()
 
 
@@ -297,14 +308,13 @@ class Sweep:
 
     def make_classic(self):
         # classic analysis
-        for variables in self.make_unify_iterable():
+        for variables in tqdm(self.make_unify_iterable(), desc='Variable(s) sweep'):
 
+            log_info = '\n'
             # setting & logging all variables
-            log_info = '\n' + '#' * 20
             for var in variables:
                 self.simulation.project.set_variable(var.name, var.value)
-                log_info += f'\nSetting {var.display_name}={var.value}'
-            log_info += '\n' + '#' * 20
+                log_info += f'Setting {var.display_name}={var.value}'
 
             epr.logger.info(log_info)
 
@@ -343,4 +353,4 @@ class Sweep:
             return product(*iter_lst)
         if self.strategy == 'zip':
             return zip(*iter_lst)
-
+        raise ValueError(f'Unknown strategy: {self.strategy}')
