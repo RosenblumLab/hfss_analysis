@@ -39,8 +39,6 @@ def parse_eigenmodes_results(df: pd.DataFrame, format_dict: Dict[str, int], vari
         res.update(extract_info(data, name, mode))
     return pd.DataFrame(res, index=[variation])
 
-    # return res
-
 
 def format_all_chis(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]):
     """
@@ -178,7 +176,7 @@ class Simulation:
 
     def extract_all_eigenmodes(self):
         eprh = epr.DistributedAnalysis(self.project.pinfo)
-        for variation_num in eprh.variations:
+        for variation_num in sorted(eprh.variations, key=lambda x: int(x)):
             # getting frequencies
             df = eprh.get_freqs_bare_pd(variation_num)
 
