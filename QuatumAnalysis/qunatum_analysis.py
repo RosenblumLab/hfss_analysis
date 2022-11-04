@@ -3,7 +3,8 @@ import pandas as pd
 import pyEPR as epr
 from itertools import product, combinations
 from dataclasses import dataclass, field
-from typing import List, Iterable, Union, Dict, Tuple
+from typing import List, Iterable, Union, Dict, Tuple, Optional
+import re
 
 QF = 'Quality Factor'
 FREQ = 'Freq. (GHz)'
@@ -31,13 +32,13 @@ def extract_info(data: dict, element_name: str, mode_idx: int) -> Dict[str, floa
     return {f'{element_name} {key}': value for key, value in res.items()}
 
 
-def parse_eigenmodes_results(df: pd.DataFrame, format_dict: Dict[str, int], variation: int) -> pd.DataFrame:
+def parse_eigenmodes_results(df: pd.DataFrame, format_dict: Dict[str, int]) -> pd.DataFrame:
     """ Format the eigenmode results to be compatible with format dict """
     data = df.to_dict()
     res = {}
     for name, mode in format_dict.items():
         res.update(extract_info(data, name, mode))
-    return pd.DataFrame(res, index=[variation])
+    return pd.DataFrame([res])
 
 
 def format_all_chis(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]):
@@ -129,6 +130,7 @@ class ValuedVariable:
     name: str
     display_name: str
     value: str
+    value_float: float
 
 
 @dataclass
@@ -147,7 +149,8 @@ class Variable:
             yield ValuedVariable(
                 name=self.design_name,
                 display_name=self.display_name,
-                value=add_units(value, self.units)
+                value=add_units(value, self.units),
+                value_float=float(value),
             )
 
 
@@ -174,18 +177,22 @@ class Simulation:
         setup = self.project.get_setup(self.setup_name)
         setup.analyze()
 
-    def extract_all_eigenmodes(self):
+    def get_variations_dict(self):
+        return epr.DistributedAnalysis(self.project.pinfo).get_variations()
+
+    def extract_all_eigenmodes(self, variation_iter: Optional[Iterable[str]] = None):
         eprh = epr.DistributedAnalysis(self.project.pinfo)
-        for variation_num in sorted(eprh.variations, key=lambda x: int(x)):
+        variation_iter = eprh.variations if variation_iter is None else variation_iter
+        for variation_num in variation_iter:
             # getting frequencies
             df = eprh.get_freqs_bare_pd(variation_num)
 
             # formatting them
             if self.format_dict is not None:
-                df = parse_eigenmodes_results(df, self.format_dict, int(variation_num))
+                df = parse_eigenmodes_results(df, self.format_dict)
 
             # adding them to the results
-            self.eigenmodes = pd.concat([self.eigenmodes, df])
+            self.eigenmodes = pd.concat([self.eigenmodes, df], ignore_index=True)
 
     def make_classic(self):
         # analysing
@@ -234,12 +241,58 @@ class Simulation:
         return self.concat_eigenmodes_and_chi()
 
 
+def gen_var_values(s, pattern_lst):
+    for p in pattern_lst:
+        m = p.search(s)
+        if not m:
+            yield None
+        var_name, value, unit = m.groups()
+        yield float(value)
+
+
+def create_pattern_lst(names: Iterable[str]):
+    # replacing $ with \$
+    names = [n.replace('$', '\$') for n in names]
+    # creating pattern and compiling it
+    # pattern matches to <var name>, <value>, <units>
+    value_pattern = '([+-]?(?:[0-9]+)(?:\.[0-9]+)?)'
+    return [re.compile(rf'({n})=\'{value_pattern}(\w+)\'') for n in names]
+
+
+def construct_variables_values_to_variation_number(names: Iterable[str], variations_dict) -> Dict[Tuple[float, ...], str]:
+    """
+    :param names: iterable of the variable names
+    :param variations_dict: a dict of <variation number> : <string of all variables with their values>
+    :return: a dict of <tuple(v_0, v_1, v_2,...)> : <variation number>. Where v_0, v_1,... are the values of the
+            variable names that appear in the variation dict.
+    """
+
+    def _helper(plst):
+        for k, v in variations_dict.items():
+            constructed_key = tuple(gen_var_values(v, plst))
+            if None in constructed_key:
+                continue
+            yield constructed_key, k
+
+    pattern_lst = create_pattern_lst(names)
+    return dict(_helper(pattern_lst))
+
+
 @dataclass
 class Sweep:
     simulation: Simulation
     variables: Union[Tuple[Variable], List[Variable]]
     strategy: str = 'product'
     results: pd.DataFrame = None
+
+    def gen_variation_sequence(self, variation_dict):
+        mem = {}
+        for vars in self.make_unify_iterable():
+            var_names = tuple(map(lambda x: x.name, vars))
+            var_values = tuple(map(lambda x: x.value_float, vars))
+            if not mem.get(var_names):
+                mem[var_names] = construct_variables_values_to_variation_number(var_names, variation_dict)
+            yield mem.get(var_names).get(var_values)
 
     def _create_parameters_dataframe(self) -> pd.DataFrame:
 
@@ -270,7 +323,9 @@ class Sweep:
             self.simulation.analyze_classic()
 
         # extracting all eigenmodes
-        self.simulation.extract_all_eigenmodes()
+        variation_dict = self.simulation.get_variations_dict()
+        variation_iter = self.gen_variation_sequence(variation_dict)
+        self.simulation.extract_all_eigenmodes(variation_iter=variation_iter)
 
     def make_quantum(self):
         # getting chi matrix
