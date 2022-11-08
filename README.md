@@ -2,6 +2,9 @@
 
 This repository contains some exaples of HFSS designs and how to simulate them using `pyEPR`.
 
+## Quantum analysis
+This wrapper was written by Uri and faciliates the use of pyEPR by a lot. Use it and check out the [example](QuantumAnalysis/example.py) there.
+
 ## Examples
 
 Analyses can be static, where parameters of a single design are calculated, or sweep, where a python loop goes over a parameter (or more) and plots the different results. The latter is useful when choosing design parameters.

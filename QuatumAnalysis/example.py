@@ -57,7 +57,8 @@ simulation = Simulation(
 
 sweep = Sweep(
     simulation=simulation,
-    variables=[resonator_length_var, transmon_pin_length_var, chip_z_position]
+    variables=[resonator_length_var, transmon_pin_length_var, chip_z_position],
+    strategy='product'  # strategy='zip' will run the variations by triplets
 )
 
 
@@ -66,5 +67,3 @@ setup = project.get_setup('Setup1')
 setup.passes = 4
 result = sweep.make_all()
 result.to_csv('sweep.csv')
-
-
