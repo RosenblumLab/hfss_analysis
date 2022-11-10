@@ -331,7 +331,7 @@ class Sweep:
 
     def add_parameters(self, df: pd.DataFrame):
         parameters_df = self._create_parameters_dataframe()
-        self.results = pd.concat([df, parameters_df], axis=1)
+        self.results = pd.concat([parameters_df, df], axis=1)
 
     def make_classic(self):
         # classic analysis
