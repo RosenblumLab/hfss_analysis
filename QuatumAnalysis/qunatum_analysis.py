@@ -41,6 +41,26 @@ def parse_eigenmodes_results(df: pd.DataFrame, format_dict: Dict[str, int]) -> p
     return pd.DataFrame([res])
 
 
+def format_ND_freqs(ND_freqs: pd.DataFrame, format_dict: Dict[str, int]):
+    """
+    :param ND_freqs: a dataframe with dim of the frequencies received from the numerical diagonalization done in the
+    quantum analysis
+    :param format_dict: an element to mode dict. e.g.:
+            {'cavity': 1,
+            'transmon: 0,
+            'readout': 2}
+    :return: formatted DataFrame
+    """
+    ordered_elements = [elem[0] for elem in sorted([(elem, num) for elem, num in format_dict.items()],
+                                                   key=lambda x: x[1])]
+
+    ND_freqs.columns.name = None
+    ND_freqs = ND_freqs.transpose()
+    ND_freqs.columns = [f'Freq ND {element} [MHz]' for element in ordered_elements]
+    ND_freqs.index = pd.RangeIndex(stop=len(ND_freqs.index))
+    return ND_freqs
+
+
 def format_all_chis(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]):
     """
     :param chi_matrix: a dataframe with dim of variations x N x N where N is the length of format_dict
@@ -88,7 +108,9 @@ def do_quantum_analysis(pinfo, modes):
     eprh.do_EPR_analysis(modes=modes)
     epra = epr.QuantumAnalysis(eprh.data_filename)
     epra.analyze_all_variations(cos_trunc=8, fock_trunc=15)
-    return epra.get_chis()
+    chi_matrix = epra.get_chis()
+    ND_freqs = epra.get_frequencies(numeric=True)
+    return chi_matrix, ND_freqs
 
 
 @dataclass
@@ -162,6 +184,7 @@ class Simulation:
     junctions: Dict[str, Dict[str, str]] = None
     eigenmodes: pd.DataFrame = field(default_factory=pd.DataFrame)
     chi_matrix: pd.DataFrame = field(default_factory=pd.DataFrame)
+    ND_freqs: pd.DataFrame = field(default_factory=pd.DataFrame)  # Frequencies from numerical diagonalization
 
     def __post_init__(self):
         # check the validity of the format dict
@@ -171,6 +194,7 @@ class Simulation:
     def clear(self):
         self.eigenmodes = pd.DataFrame()
         self.chi_matrix = pd.DataFrame()
+        self.ND_freqs = pd.DataFrame()
 
     def analyze_classic(self):
         # analysing
@@ -223,22 +247,25 @@ class Simulation:
         self.add_junctions()
 
         # make anaylsis and get chi matrix
-        chi_matrix = do_quantum_analysis(self.project.pinfo, modes)
+        chi_matrix, ND_freqs = do_quantum_analysis(self.project.pinfo, modes)
 
-        # formatting chi matrix to fit format dict
+
+        # formatting chi matrix and ND frequencies to fit format dict
         chi_matrix = format_all_chis(chi_matrix, self.format_dict)
+        ND_freqs = format_ND_freqs(ND_freqs, self.format_dict)
 
         # adding them to the results
         self.chi_matrix = pd.concat([self.chi_matrix, chi_matrix])
+        self.ND_freqs = pd.concat([self.ND_freqs, ND_freqs])
 
-    def concat_eigenmodes_and_chi(self):
+    def concat_eigenmodes_chi_and_ND_freqs(self):
         # parsing eigenmodes according to the format dict
-        return pd.concat([self.eigenmodes, self.chi_matrix], axis=1)
+        return pd.concat([self.eigenmodes, self.chi_matrix, self.ND_freqs], axis=1)
 
     def make_all(self):
         self.make_classic()
         self.make_quantum()
-        return self.concat_eigenmodes_and_chi()
+        return self.concat_eigenmodes_chi_and_ND_freqs()
 
 
 def gen_var_values(s, pattern_lst):
@@ -339,7 +366,7 @@ class Sweep:
             self.make_quantum()
 
             # getting results
-            self.results = self.simulation.concat_eigenmodes_and_chi()
+            self.results = self.simulation.concat_eigenmodes_chi_and_ND_freqs()
 
         else:
             self.results = self.simulation.eigenmodes
