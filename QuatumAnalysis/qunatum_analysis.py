@@ -377,10 +377,9 @@ class Sweep:
         return self.results
 
     def make_unify_iterable(self) -> Iterable:
-        """Convert the variables to a one iterable"""
+        """Convert the variables to a single iterable"""
         iter_lst = [variable.gen() for variable in self.variables]
         if self.strategy == 'product':
             return product(*iter_lst)
         if self.strategy == 'zip':
             return zip(*iter_lst)
-
