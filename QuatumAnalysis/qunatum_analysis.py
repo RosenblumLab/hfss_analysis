@@ -107,7 +107,7 @@ def do_quantum_analysis(pinfo, modes):
     eprh = epr.DistributedAnalysis(pinfo)
     eprh.do_EPR_analysis(modes=modes)
     epra = epr.QuantumAnalysis(eprh.data_filename)
-    epra.analyze_all_variations(cos_trunc=8, fock_trunc=15)
+    epra.analyze_all_variations(cos_trunc=8, fock_trunc=15, modes=modes)
     chi_matrix = epra.get_chis()
     ND_freqs = epra.get_frequencies(numeric=True)
     return chi_matrix, ND_freqs
