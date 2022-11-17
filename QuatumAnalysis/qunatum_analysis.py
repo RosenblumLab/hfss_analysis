@@ -199,6 +199,9 @@ class Simulation:
     def analyze_classic(self):
         # analysing
         setup = self.project.get_setup(self.setup_name)
+        if setup.basis_order != '-1':
+            epr.logger.warning('Setup order is not set to "Mixed Order", which usually gives the best results.')
+
         setup.analyze()
 
     def get_variations_dict(self):
@@ -260,7 +263,7 @@ class Simulation:
 
     def concat_eigenmodes_chi_and_ND_freqs(self):
         # parsing eigenmodes according to the format dict
-        return pd.concat([self.eigenmodes, self.chi_matrix, self.ND_freqs], axis=1)
+        return pd.concat([ self.ND_freqs, self.eigenmodes, self.chi_matrix], axis=1)
 
     def make_all(self):
         self.make_classic()
