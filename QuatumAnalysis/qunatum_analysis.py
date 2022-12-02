@@ -41,10 +41,11 @@ def parse_eigenmodes_results(df: pd.DataFrame, format_dict: Dict[str, int]) -> p
     return pd.DataFrame([res])
 
 
-def format_ND_freqs(ND_freqs: pd.DataFrame, format_dict: Dict[str, int]):
+def format_ND_freqs(ND_freqs: pd.DataFrame, format_dict: Dict[str, int],
+                    variations_iter: Optional[Iterable[str]] = None) -> pd.DataFrame:
     """
     :param ND_freqs: a dataframe with dim of the frequencies received from the numerical diagonalization done in the
-    quantum analysis
+        quantum analysis
     :param format_dict: an element to mode dict. e.g.:
             {'cavity': 1,
             'transmon: 0,
@@ -56,31 +57,38 @@ def format_ND_freqs(ND_freqs: pd.DataFrame, format_dict: Dict[str, int]):
 
     ND_freqs.columns.name = None
     ND_freqs = ND_freqs.transpose()
+    variations_iter = [str(i) for i in range(len(ND_freqs.index))] if variations_iter is None else variations_iter
+    ND_freqs = ND_freqs.reindex(variations_iter)
     ND_freqs.columns = [f'Freq ND {element} [MHz]' for element in ordered_elements]
     ND_freqs.index = pd.RangeIndex(stop=len(ND_freqs.index))
     return ND_freqs
 
 
-def format_all_chis(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]):
+def format_all_chis(chi_matrix: pd.DataFrame, format_dict: Dict[str, int],
+                    variations_iter: Optional[Iterable[str]] = None) -> pd.DataFrame:
     """
     :param chi_matrix: a dataframe with dim of variations x N x N where N is the length of format_dict
     :param format_dict: an element to mode dict. e.g.:
             {'cavity': 1,
             'transmon: 0,
             'readout': 2}
-    :return: a dict with the length of 2 choose N times variations
+    :param variations_iter: Used by the `Sweep` class to adapt the order of the iteration to the given parameters.
+    :return: a dataframe with the length of 2 choose N times variations
     """
 
-    def _helper():
-        variations = int(chi_matrix.shape[0] / len(format_dict))  # number of rows in chi div num of elements
-        for i in range(variations):
+    def _helper(variations_iter: Iterable[Union[int, str]]):
+        for i in variations_iter:
             chi = chi_matrix.loc[[str(i)]]
             yield format_chi_matrix(chi, format_dict)
 
-    return pd.DataFrame(list(_helper()))
+    if variations_iter is None:
+        variations_num = int(chi_matrix.shape[0] / len(format_dict))  # number of rows in chi div num of elements
+        variations_iter = range(variations_num)
+
+    return pd.DataFrame(list(_helper(variations_iter=variations_iter)))
 
 
-def format_chi_matrix(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]):
+def format_chi_matrix(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]) -> Dict[str, float]:
     """
     :param chi_matrix: a dataframe with dim of NxN where N is the length of format_dict
     :param format_dict: an element to mode dict. e.g.:
@@ -228,12 +236,14 @@ class Simulation:
         # saving results
         self.extract_all_eigenmodes()
 
+        return self.eigenmodes
+
     def add_junctions(self):
         for junction_name, value in self.junctions.items():
             self.project.pinfo.junctions[junction_name] = value
         self.project.pinfo.validate_junction_info()
 
-    def make_quantum(self):
+    def make_quantum(self, variations_iter: Optional[Iterable[str]] = None):
         # first check the validity of the format dict
         if self.format_dict is None:
             raise ValueError('For quantum simulation format_dict is needed!')
@@ -249,13 +259,12 @@ class Simulation:
         # adding junctions
         self.add_junctions()
 
-        # make anaylsis and get chi matrix
+        # make analysis and get chi matrix
         chi_matrix, ND_freqs = do_quantum_analysis(self.project.pinfo, modes)
 
-
         # formatting chi matrix and ND frequencies to fit format dict
-        chi_matrix = format_all_chis(chi_matrix, self.format_dict)
-        ND_freqs = format_ND_freqs(ND_freqs, self.format_dict)
+        chi_matrix = format_all_chis(chi_matrix, self.format_dict, variations_iter=variations_iter)
+        ND_freqs = format_ND_freqs(ND_freqs, self.format_dict, variations_iter=variations_iter)
 
         # adding them to the results
         self.chi_matrix = pd.concat([self.chi_matrix, chi_matrix])
@@ -314,6 +323,7 @@ class Sweep:
     variables: Union[Tuple[Variable], List[Variable]]
     strategy: str = 'product'
     results: pd.DataFrame = None
+    _variations: List[str] = None  # Reorganize the variations according to the given parameters
 
     def gen_variation_sequence(self, variation_dict):
         mem = {}
@@ -355,11 +365,13 @@ class Sweep:
         # extracting all eigenmodes
         variation_dict = self.simulation.get_variations_dict()
         variation_iter = self.gen_variation_sequence(variation_dict)
-        self.simulation.extract_all_eigenmodes(variation_iter=variation_iter)
+        # add new attribute to sweep and save iteraton as list
+        self._variations = list(variation_iter)
+        self.simulation.extract_all_eigenmodes(variation_iter=self._variations)
 
     def make_quantum(self):
-        # getting chi matrix
-        self.simulation.make_quantum()
+        # getting chi matrix and numerically-diagonalized (ND) frequencies
+        self.simulation.make_quantum(variations_iter=self._variations)
 
     def make_all(self, do_quantum=True):
         # making simulations
