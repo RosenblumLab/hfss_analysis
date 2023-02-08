@@ -5,10 +5,12 @@ from itertools import product, combinations
 from dataclasses import dataclass, field
 from typing import List, Iterable, Union, Dict, Tuple, Optional
 import re
+from tqdm import tqdm
 
 QF = 'Quality Factor'
 FREQ = 'Freq. (GHz)'
 LIFETIME = 'Lifetime (us)'
+ROUNDING_DIGIT = 4  # Used to adapt HFSS floating point rounding and Python/NumPy rounding
 
 
 def add_units(value: Union[float, int], units: str) -> str:
@@ -57,9 +59,12 @@ def format_ND_freqs(ND_freqs: pd.DataFrame, format_dict: Dict[str, int],
 
     ND_freqs.columns.name = None
     ND_freqs = ND_freqs.transpose()
+    # if variations_iter is None:
+        # ND_freqs = ND_freqs.sort_index(key=lambda x: x.to_series().astype(int))
     variations_iter = [str(i) for i in range(len(ND_freqs.index))] if variations_iter is None else variations_iter
+    # else:
     ND_freqs = ND_freqs.reindex(variations_iter)
-    ND_freqs.columns = [f'Freq ND {element} [MHz]' for element in ordered_elements]
+    ND_freqs.columns = [f'Freq ND {element} (MHz)' for element in ordered_elements]
     ND_freqs.index = pd.RangeIndex(stop=len(ND_freqs.index))
     return ND_freqs
 
@@ -106,8 +111,8 @@ def format_chi_matrix(chi_matrix: pd.DataFrame, format_dict: Dict[str, int]) -> 
     coupling_names = [f'{ordered_elements[i]}-{ordered_elements[j]}' for i, j in chis_idx]
     res = {}
     for i in range(element_num):
-        res[f'{ordered_elements[i]} Anharmonicity (Mhz)'] = anharmonicity[i]
-        res[f'{coupling_names[i]} (Mhz)'] = couplings[i]
+        res[f'{ordered_elements[i]} Anharmonicity (MHz)'] = anharmonicity[i]
+        res[f'{coupling_names[i]} (MHz)'] = couplings[i]
     return res
 
 
@@ -136,7 +141,7 @@ class Project:
     def get_project(self):
         return self.pinfo.project
 
-    def get_setup(self, setup_name: str):
+    def get_setup(self, setup_name: str) -> epr.ansys.HfssSetup:
         return self.pinfo.design.get_setup(setup_name)
 
     def set_variable(self, name: str, value: str):
@@ -272,7 +277,7 @@ class Simulation:
 
     def concat_eigenmodes_chi_and_ND_freqs(self):
         # parsing eigenmodes according to the format dict
-        return pd.concat([ self.ND_freqs, self.eigenmodes, self.chi_matrix], axis=1)
+        return pd.concat([self.ND_freqs, self.chi_matrix, self.eigenmodes], axis=1)
 
     def make_all(self):
         self.make_classic()
@@ -286,7 +291,7 @@ def gen_var_values(s, pattern_lst):
         if not m:
             yield None
         var_name, value, unit = m.groups()
-        yield float(value)
+        yield np.round(float(value), decimals=ROUNDING_DIGIT)
 
 
 def create_pattern_lst(names: Iterable[str]):
@@ -306,9 +311,9 @@ def construct_variables_values_to_variation_number(names: Iterable[str], variati
             variable names that appear in the variation dict.
     """
 
-    def _helper(plst):
+    def _helper(pattern_lst):
         for k, v in variations_dict.items():
-            constructed_key = tuple(gen_var_values(v, plst))
+            constructed_key = tuple(gen_var_values(v, pattern_lst))
             if None in constructed_key:
                 continue
             yield constructed_key, k
@@ -329,7 +334,7 @@ class Sweep:
         mem = {}
         for vars in self.make_unify_iterable():
             var_names = tuple(map(lambda x: x.name, vars))
-            var_values = tuple(map(lambda x: x.value_float, vars))
+            var_values = tuple(map(lambda x: np.round(x.value_float, decimals=ROUNDING_DIGIT), vars))
             if not mem.get(var_names):
                 mem[var_names] = construct_variables_values_to_variation_number(var_names, variation_dict)
             yield mem.get(var_names).get(var_values)
@@ -348,8 +353,9 @@ class Sweep:
 
     def make_classic(self):
         # classic analysis
-        for variables in self.make_unify_iterable():
-
+        full_var_list = list(self.make_unify_iterable())
+        for i, variables in (pbar := tqdm(enumerate(full_var_list), total=len(full_var_list))):
+            pbar.set_description(f'Variation {i}')
             # setting & logging all variables
             log_info = '\n' + '#' * 20
             for var in variables:
