@@ -23,6 +23,8 @@ setuptools.setup(
         'pandas',
         'numpy',
         'pyEPR-quantum',
-        'tqdm'
+        'tqdm',
+        'tabulate',
+        'matplotlib',
     ],
 )

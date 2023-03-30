@@ -234,7 +234,7 @@ class Simulation:
             # adding them to the results
             self.eigenmodes = pd.concat([self.eigenmodes, df], ignore_index=True)
 
-    def make_classic(self):
+    def make_classic(self) -> pd.DataFrame:
         # analysing
         self.analyze_classic()
 
