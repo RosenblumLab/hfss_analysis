@@ -18,9 +18,10 @@ classifiers = [
 ]
 
 dependencies = [
-"pandas",
-"pyEPR-qunatum",
-"pytest",
+    "pandas",
+    "pyEPR-quantum",
+    "pytest",
+    "tqdm",
 ]
 
 #[project.urls]
