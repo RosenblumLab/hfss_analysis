@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hfss_analysis"
+version = "0.0.1"
+authors = [
+  { name="Uri Goldblatt", email="goldblatt.uri@weizmann.ac.il" },
+]
+description = "Automating simulation with hfss and pyEPR"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+"pandas",
+"pyEPR-qunatum",
+"pytest",
+]
+
+#[project.urls]
+#"Homepage" = "https://github.com/pypa/sampleproject"
+#"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
