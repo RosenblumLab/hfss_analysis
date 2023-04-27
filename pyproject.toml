@@ -6,7 +6,8 @@ build-backend = "hatchling.build"
 name = "hfss_analysis"
 version = "0.0.1"
 authors = [
-  { name="Uri Goldblatt", email="goldblatt.uri@weizmann.ac.il" },
+  {name="Uri Goldblatt", email="goldblatt.uri@weizmann.ac.il" },
+  {name="Barkay Guttel", email="barkay.guttel@weizmann.ac.il" },
 ]
 description = "Automating simulation with hfss and pyEPR"
 readme = "README.md"
@@ -19,11 +20,8 @@ classifiers = [
 
 dependencies = [
     "pandas",
-    "pyEPR-quantum",
     "pytest",
     "tqdm",
+    "pywin32"
 ]
 
-#[project.urls]
-#"Homepage" = "https://github.com/pypa/sampleproject"
-#"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
