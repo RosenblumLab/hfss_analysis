@@ -3,6 +3,8 @@ from typing import Any, Tuple, Dict, List
 from ..variables.variables import ValuedVariable, snapshot_to_dict
 from collections import defaultdict
 from functools import reduce
+import json
+from pathlib import Path
 
 
 @dataclass
@@ -10,11 +12,18 @@ class SimulationResult:
     result: Dict[str, Any]
     snapshot: Tuple[ValuedVariable, ...]
 
-    def to_dict(self):
-        return asdict(self)
+    def to_dict(self, with_snapshot: bool = True):
+        if with_snapshot:
+            return asdict(self)
+        else:
+            return self.result
 
     def to_flat_dict(self):
         return _merge_two_dicts(self.result, snapshot_to_dict(self.snapshot))
+
+    def save_to_json(self, path: Path | str, with_snapshot: bool = True):
+        with open(Path(path).with_suffix('.json'), 'w') as json_file:
+            json.dump(self.to_dict(with_snapshot=with_snapshot), json_file, indent=4)
 
 
 def _merge_two_dicts(dict_a: Dict, dict_b: Dict):
