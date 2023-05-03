@@ -5,6 +5,7 @@ Supported loss channels:
     1. Seam loss
     2. Geometry (G-) and Filling (F-) factors. Note that these values are NOT quality factors.
     3. Surface losses (at the interfaces between metal, substrate and air)
+    4. Bulk loss (e.g. from chip substrate)
 
     TODO add external coupling quality factors.
 """
