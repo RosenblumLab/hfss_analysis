@@ -61,6 +61,3 @@ def apply_format_single(data: SimulationResult, modes_to_labels: Dict[int, str] 
 def apply_format(data: List[SimulationResult],
                  modes_to_labels: Dict[int, str] = None) -> List[SimulationResult]:
     return list(map(lambda x: apply_format_single(x, modes_to_labels), data))
-
-
-

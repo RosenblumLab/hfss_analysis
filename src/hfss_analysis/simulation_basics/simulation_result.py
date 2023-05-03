@@ -51,6 +51,7 @@ def join(sims: List[SimulationResult]) -> List[SimulationResult]:
                                         snapshot=(v_a, v_c)
 
     """
+
     # convert the list to dict
     data = defaultdict(list)
     for sim in sims:
@@ -58,10 +59,3 @@ def join(sims: List[SimulationResult]) -> List[SimulationResult]:
 
     return [SimulationResult(snapshot=snapshot,  # type: ignore
                              result=reduce(_merge_dicts, results)) for snapshot, results in data.items()]
-
-
-
-
-
-
-

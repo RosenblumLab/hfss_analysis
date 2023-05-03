@@ -97,4 +97,3 @@ def parameters_to_variation(variation_dict: Dict[str, str],
     parameters = sort_valued_variables(parameters)
 
     return valued_vars_to_variation_dict[parameters]
-

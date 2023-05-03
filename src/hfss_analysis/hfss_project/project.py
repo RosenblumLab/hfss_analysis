@@ -6,11 +6,6 @@ from ..variables.variables import ValuedVariable
 from .variation_dict_helper import dict_to_valued_variables, construct_variables_to_variation
 
 
-def add_units(value: Union[float, int], units: str) -> str:
-    """adding units to float/int and returns a str"""
-    return f'{value}{units}'
-
-
 @dataclass
 class Project:
     project_directory: str
@@ -126,9 +121,3 @@ class Project:
         for junction_name, value in junction_info.items():
             self.pinfo.junctions[junction_name] = value
         self.pinfo.validate_junction_info()
-
-
-
-
-
-

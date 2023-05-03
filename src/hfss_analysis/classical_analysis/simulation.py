@@ -47,4 +47,3 @@ class ClassicalSimulation:
 def analyze(project: Project, sweep: Optional[Sweep] = None) -> List[SimulationResult]:
     sim = ClassicalSimulation(project)
     return sim.analysis(sweep)
-

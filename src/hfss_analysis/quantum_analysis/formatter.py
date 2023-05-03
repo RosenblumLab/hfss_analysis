@@ -18,7 +18,7 @@ def _get_frequencies(data: Dict) -> pd.Series:
 
 
 def _sequential_mode_to_label(modes_to_labels: Dict[int, str]) -> Dict[int, str]:
-    """Simply convet the modes numbers in the dict to sequential array.
+    """Simply convert the modes numbers in the dict to sequential array.
     e.g.:
         input:  {0: 'transmon', 2: 'readout', 4: 'cavity'}
         output: {0: 'transmon', 1: 'readout', 2: 'cavity'}
@@ -31,7 +31,6 @@ def _flatten_chis(chis: pd.DataFrame) -> Dict[Tuple[int, int], float]:
     Assuming the chi matrix is a symmetric matrix, hence we only want 2-combinations
     with replacements
     :param chis: dataframe symmetric matrix NxN
-    :param mode_to_label: dictionary of mode number (should be sequential modes) to str
     :return: a dictionary where the keys are the combinations of the modes
     """
     assert chis.shape[0] == chis.shape[1]
@@ -53,7 +52,7 @@ def _apply_mode_to_label_on_flatten_chi(flat_chi: Dict[Tuple[int, int], float],
         else:
             names = f'{modes_to_labels[t[0]]} - {modes_to_labels[t[1]]}'
             suffix = Constants.COUPLING
-        return f'{names} {suffix} (Mhz)'
+        return f'{names} {suffix} (MHz)'
 
     return {_format_key(k): v for k, v in flat_chi.items()}
 
@@ -64,7 +63,7 @@ def _format_frequencies(frequencies: pd.Series, modes_to_labels: Dict[int, str])
         return freq / 1e3
 
     def _format_key(s: str):
-        return f'{s} ND Freq. (Ghz)'
+        return f'{s} ND Freq. (GHz)'
 
     return {_format_key(modes_to_labels[i]): _format_value(freq)
             for i, freq in enumerate(frequencies)}
@@ -100,5 +99,3 @@ def apply_format_single(data: SimulationResult, modes_to_labels: Dict[int, str] 
 def apply_format(data: List[SimulationResult],
                  modes_to_labels: Dict[int, str] = None) -> List[SimulationResult]:
     return list(map(lambda x: apply_format_single(x, modes_to_labels), data))
-
-
