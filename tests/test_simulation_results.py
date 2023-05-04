@@ -22,6 +22,10 @@ expected = [
                              'i_know_who_i_am': True}, snapshot=(v_a, v_c)),
 ]
 
+
 def test_simulation_results_merge():
     result = join(data)
+    assert(result == expected)
+
+    result = join(*data)
     assert(result == expected)

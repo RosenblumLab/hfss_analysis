@@ -45,8 +45,10 @@ def merge(sim_a: SimulationResult, sim_b: SimulationResult) -> SimulationResult:
     )
 
 
-def join(sims: List[SimulationResult]) -> List[SimulationResult]:
-    """A list of results with non-unique snapshots are combined accordingly to their snapshot
+def join(*sims: List[SimulationResult] | Tuple[SimulationResult, ...]) -> List[SimulationResult]:
+    """A list of results with non-unique snapshots are combined accordingly to their snapshot.
+
+    The function also supports the SimulationResults being passed individually.
     e.g.:
     input:
         results[0] = SimulationResult(  result={'name': 'hi'},          snapshot=(v_a, v_b) )
@@ -60,10 +62,18 @@ def join(sims: List[SimulationResult]) -> List[SimulationResult]:
                                         snapshot=(v_a, v_c)
 
     """
+    # Support both methods to pass multiple SimulationResults
+    if len(sims) == 1 and isinstance(sims[0], list):
+        # Handle case where a single list is passed as the argument
+        sims_list = sims[0]
+    else:
+        # Handle case where multiple arguments are passed individually
+        sims_list = list(sims)
 
     # convert the list to dict
     data = defaultdict(list)
-    for sim in sims:
+
+    for sim in sims_list:
         data[sim.snapshot].append(sim.result)  # type: ignore
 
     return [SimulationResult(snapshot=snapshot,  # type: ignore
