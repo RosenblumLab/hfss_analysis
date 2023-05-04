@@ -99,7 +99,7 @@ class Project:
         """
         extract results of classical analysis using snapshot
         :param snapshot: a tuple of valued variables used for the analysis
-        :return: a dataframe of the frequencies, modes and quality factors
+        :return: a dataframe with modes as indices and frequencies and quality factors as columns
         """
         # snapshot to variation number
         variation_number = self.inverse_variation_dict.get(snapshot)
