@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, Union, Optional, Tuple
+from typing import Iterable, Union, Optional, Tuple, Dict
 import numpy as np
 
 ROUNDING_DIGIT = 6
@@ -69,7 +69,7 @@ def round_and_sort_valued_variables(valued_vars: Iterable[ValuedVariable]) -> Tu
     return sort_valued_variables(round_valued_variables(valued_vars))
 
 
-def snapshot_to_dict(snapshot: Tuple[ValuedVariable, ...]):
+def snapshot_to_dict(snapshot: Tuple[ValuedVariable, ...]) -> Dict[str, float]:
     return {f'{v.name} {v.unit}': v.value for v in snapshot}
 
 

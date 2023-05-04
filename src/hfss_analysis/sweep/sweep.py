@@ -9,7 +9,7 @@ from ..variables.variables import ValuedVariable, round_and_sort_valued_variable
 @dataclass
 class Sweep:
     project: Project
-    variables: Union[Tuple[Variable, ...], List[Variable]]
+    variables: Iterable[Variable]
     strategy: str = 'product'
     # results: Dict = field(default_factory=dict)
     _snapshots: List[Tuple[ValuedVariable]] = field(default_factory=list)

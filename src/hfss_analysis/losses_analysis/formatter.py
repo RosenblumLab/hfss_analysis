@@ -7,7 +7,7 @@ from functools import reduce
 
 def _convert_modes_to_labels(data: Dict, modes_to_labels: Dict[int, str]):
     """For each mode in the mapping we replace the data with its name.
-    Also removes any mode that do not appear in the modes to label mapping
+    Also removes any mode that do not appear in the `modes_to_labels` mapping.
     """
     result = {}
     for k, v in data.items():
