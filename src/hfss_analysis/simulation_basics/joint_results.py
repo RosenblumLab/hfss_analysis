@@ -25,16 +25,15 @@ class JointSimulationResults:
         return [r.to_flat_dict() for r in self.results], \
             snapshot_to_dict(self.constant_variables)
 
-    def save_to_csv(self, path):
+    def save_to_csv(self, path: Path | str):
         data, constants = self._pack()
         # saving data
         df = pd.DataFrame(data)
-        df.to_csv(path, index=False)
+        df.to_csv(Path(path).with_suffix('.csv'), index=False)
 
         # saving constants
-        constant_path = f'{Path(path).stem}_constants.json'
+        constant_path = Path(f'{Path(path).stem}_constants').with_suffix('.json')
         json_save(constant_path, constants)
-
 
 
 def minimize_results(sim_results: List[SimulationResult]) -> JointSimulationResults:
