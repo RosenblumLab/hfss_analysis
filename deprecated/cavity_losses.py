@@ -13,7 +13,6 @@ Supported loss channels:
 import numpy as np
 import pandas as pd
 import pyEPR as epr
-# from pyEPR.core import *
 from pyEPR.core_distributed_analysis import CalcObject
 from deprecated.qunatum_analysis import Simulation
 from dataclasses import dataclass, asdict
