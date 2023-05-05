@@ -18,11 +18,12 @@ pip install -e <pyEPR-quantum repo local path>
 
 ## Usage
 ```python
-from hfss_analysis import classical_analysis, quantum_analysis, Sweep, \
+from hfss_analysis import classical_analysis, quantum_analysis, losses_analysis, Sweep, \
     join, minimize_results, Project, Variable
 
 
-# instantiation of the project class, pointing to existing HFSS design and setup.
+'''instantiation of the project class, pointing to existing HFSS design and setup.'''
+
 project = Project(
     project_directory=r'PATH_TO_PROJECT_DIR',
     project_name='PROJECT_NAME',  # File name
@@ -68,7 +69,8 @@ modes_to_labels = {
 }
 
 
-# making simulation
+'''simulating the results and saving them'''
+
 raw_classical_results = classical_analysis.analyze(project, sweep)
 raw_quantum_results = quantum_analysis.analyze(project, list(modes_to_labels.keys()), sweep)
 
@@ -87,6 +89,36 @@ results = minimize_results(joint_results)
 
 # saving
 results.save_to_csv('sample.csv')
+
+
+'''calculating quality factors related to different losses'''
+
+raw_seam_loss_results = losses_analysis.analyze_seam_loss(project=project, seam_line='SeamLine',
+                                                          modes=list(modes_to_labels.keys()), sweep=sweep)
+
+raw_g_f_factors_results = losses_analysis.analyze_geometry_and_filling_factors(project=project,
+                                                                               modes=list(modes_to_labels.keys()),
+                                                                               sweep=sweep)
+
+raw_surface_loss_results = losses_analysis.analyze_surface_loss(project=project,
+                                                                metal_surfaces=['JJ', 'ROresonator',
+                                                                                'TransmonPads'],
+                                                                substrate='ChipSubstrate',
+                                                                modes=list(modes_to_labels.keys()),
+                                                                sweep=sweep)
+
+raw_bulk_loss_results = losses_analysis.analyze_bulk_loss(project=project,
+                                                          bulk='ChipSubstrate', loss_tangent=62e-9,
+                                                          modes=list(modes_to_labels.keys()),
+                                                          sweep=sweep)
+
+# we can now format these results and join them with the results we already have
+joint_results_with_losses = join(joint_results, [losses_analysis.apply_format(
+    loss_raw_result, modes_to_labels) for loss_raw_result in (raw_seam_loss_results,
+                                                              raw_g_f_factors_results,
+                                                              raw_surface_loss_results,
+                                                              raw_bulk_loss_results)])
+minimize_results(joint_results_with_losses).save_to_csv('sample_with_losses.csv')
 ```
 
 ## Key concepts
