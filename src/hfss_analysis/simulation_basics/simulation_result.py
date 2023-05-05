@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Any, Tuple, Dict, List
+from typing import Any, Tuple, Dict, List, Iterator
 from ..variables.variables import ValuedVariable, snapshot_to_dict
 from collections import defaultdict
 from functools import reduce
@@ -45,6 +45,15 @@ def merge(sim_a: SimulationResult, sim_b: SimulationResult) -> SimulationResult:
     )
 
 
+def flatten_lists_into_generator(lst: list[SimulationResult | list[SimulationResult]]
+                                 ) -> Iterator[SimulationResult]:
+    for x in lst:
+        if isinstance(x, list):
+            yield from flatten_lists_into_generator(x)
+        else:
+            yield x
+
+
 def join(*sims: List[SimulationResult] | Tuple[SimulationResult, ...]) -> List[SimulationResult]:
     """A list of results with non-unique snapshots are combined accordingly to their snapshot.
 
@@ -72,6 +81,9 @@ def join(*sims: List[SimulationResult] | Tuple[SimulationResult, ...]) -> List[S
 
     # convert the list to dict
     data = defaultdict(list)
+
+    # flatten the list into a single generator of `SimulationResult` (useful for, e.g., nested list)
+    sims_list = flatten_lists_into_generator(sims_list)
 
     for sim in sims_list:
         data[sim.snapshot].append(sim.result)  # type: ignore
