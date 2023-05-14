@@ -22,7 +22,7 @@ class Project:
     project: epr.ansys.HfssProject = field(init=False)
     setup: epr.ansys.HfssSetup = field(init=False)
     design: epr.ansys.HfssDesign = field(init=False)
-    distributed_analysis: epr.DistributedAnalysis = field(init=False)
+    _distributed_analysis: epr.DistributedAnalysis = field(init=False)
 
     def __post_init__(self):
         self.pinfo = epr.Project_Info(project_path=self.project_directory,
@@ -32,7 +32,12 @@ class Project:
         self.project = self.pinfo.project
         self.design = self.pinfo.design
         self.setup = self.design.get_setup(self.setup_name)
-        self.distributed_analysis = epr.DistributedAnalysis(self.pinfo)
+        self._distributed_analysis = epr.DistributedAnalysis(self.pinfo)
+
+    @property
+    def distributed_analysis(self):
+        self._distributed_analysis.update_ansys_info()
+        return self._distributed_analysis
 
     def set_variable(self, variable: ValuedVariable):
         name, value = variable.to_name_and_value()
@@ -82,10 +87,8 @@ class Project:
         return self._variation_dict
 
     def _is_variation_valid(self) -> bool:
-        if (not self._variation_dict) or \
-                (self.distributed_analysis.get_variations() == self._variation_dict):
-            return False
-        return True
+        return (self._variation_dict) and \
+            (self.distributed_analysis.get_variations() == self._variation_dict)
 
     @property
     def inverse_variation_dict(self):
@@ -104,7 +107,7 @@ class Project:
         # snapshot to variation number
         variation_number = self.inverse_variation_dict.get(snapshot)
         if not variation_number:
-            print('Cannot find variation number for the given snapshot (tuple of valued vars')
+            print('Cannot find variation number for the given snapshot (tuple of valued vars)')
             raise ValueError
 
         # return frequencies using variation number
