@@ -32,8 +32,8 @@ class JointSimulationResults:
         df.to_csv(Path(path).with_suffix('.csv'), index=False)
 
         # saving constants
-        constant_path = Path(f'{Path(path).stem}_constants').with_suffix('.json')
-        json_save(constant_path, constants)
+        constants_path = Path(f'{Path(path).stem}_constants').with_suffix('.json')
+        json_save(constants_path, constants)
 
 
 def minimize_results(sim_results: List[SimulationResult]) -> JointSimulationResults:

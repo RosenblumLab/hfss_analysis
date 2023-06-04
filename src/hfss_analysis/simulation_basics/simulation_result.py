@@ -54,7 +54,8 @@ def flatten_lists_into_generator(lst: list[SimulationResult | list[SimulationRes
             yield x
 
 
-def join(*sims: List[SimulationResult] | Tuple[SimulationResult, ...]) -> List[SimulationResult]:
+def join(*sims: List[SimulationResult] | List[List[SimulationResult]] | Tuple[SimulationResult, ...]
+         ) -> List[SimulationResult]:
     """A list of results with non-unique snapshots are combined accordingly to their snapshot.
 
     The function also supports the SimulationResults being passed individually.

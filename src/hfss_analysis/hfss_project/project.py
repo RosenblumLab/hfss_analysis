@@ -89,7 +89,7 @@ class Project:
 
     @property
     def inverse_variation_dict(self):
-        if (not self._is_variation_valid()) or (not self._inverse_variation_dict):
+        if (not self._is_variation_valid()) or (self._inverse_variation_dict is None):
             variation_dict = self.variation_dict
             self._inverse_variation_dict = construct_variables_to_variation(variation_dict)
 
@@ -104,7 +104,7 @@ class Project:
         # snapshot to variation number
         variation_number = self.inverse_variation_dict.get(snapshot)
         if not variation_number:
-            print('Cannot find variation number for the given snapshot (tuple of valued vars')
+            print('Cannot find variation number for the given snapshot (tuple of valued vars)')
             raise ValueError
 
         # return frequencies using variation number
