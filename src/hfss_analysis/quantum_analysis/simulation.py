@@ -54,6 +54,6 @@ class QuantumSimulation:
 
 def analyze(project: Project, modes: List[int], sweep: Optional[Sweep] = None,
             variation_chooser: Literal['all', 'current'] = 'current') -> List[SimulationResult]:
-
+    assert len(project.pinfo.junctions) > 0, "No Josephson junctions were added to the project!"
     sim = QuantumSimulation(project, modes)
     return sim.analysis(sweep, variation_chooser)
