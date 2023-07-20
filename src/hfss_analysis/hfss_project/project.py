@@ -2,13 +2,14 @@ from dataclasses import dataclass, field
 import pandas as pd
 import pyEPR as epr
 from typing import Dict, Tuple, Union, Iterable
+from pathlib import Path
 from ..variables.variables import ValuedVariable
 from .variation_dict_helper import dict_to_valued_variables, construct_variables_to_variation
 
 
 @dataclass
 class Project:
-    project_directory: str
+    project_directory: str | Path
     project_name: str  # file name
     design_name: str
     setup_name: str
