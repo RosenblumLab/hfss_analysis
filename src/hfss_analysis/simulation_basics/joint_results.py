@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Dict, Tuple, Any, List
+from typing import Dict, Tuple, Any, List, Union
 from ..variables.variables import ValuedVariable, snapshot_to_dict
 from .simulation_result import SimulationResult
 import pandas as pd
