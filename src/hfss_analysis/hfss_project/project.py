@@ -9,7 +9,7 @@ from .variation_dict_helper import dict_to_valued_variables, construct_variables
 
 @dataclass
 class Project:
-    project_directory: str | Path
+    project_directory: Union[str, Path]
     project_name: str  # file name
     design_name: str
     setup_name: str
