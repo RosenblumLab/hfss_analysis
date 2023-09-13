@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Any, Tuple, Dict, List, Iterator
+from typing import Any, Tuple, Dict, List, Iterator, Union
 from ..variables.variables import ValuedVariable, snapshot_to_dict
 from collections import defaultdict
 from functools import reduce
@@ -21,7 +21,7 @@ class SimulationResult:
     def to_flat_dict(self):
         return _merge_two_dicts(self.result, snapshot_to_dict(self.snapshot))
 
-    def save_to_json(self, path: Path | str, with_snapshot: bool = True):
+    def save_to_json(self, path: Union[Path, str], with_snapshot: bool = True):
         with open(Path(path).with_suffix('.json'), 'w') as json_file:
             json.dump(self.to_dict(with_snapshot=with_snapshot), json_file, indent=4)
 
@@ -45,7 +45,7 @@ def merge(sim_a: SimulationResult, sim_b: SimulationResult) -> SimulationResult:
     )
 
 
-def flatten_lists_into_generator(lst: list[SimulationResult | list[SimulationResult]]
+def flatten_lists_into_generator(lst: list[Union[SimulationResult, list[SimulationResult]]]
                                  ) -> Iterator[SimulationResult]:
     for x in lst:
         if isinstance(x, list):
@@ -54,7 +54,7 @@ def flatten_lists_into_generator(lst: list[SimulationResult | list[SimulationRes
             yield x
 
 
-def join(*sims: List[SimulationResult] | List[List[SimulationResult]] | Tuple[SimulationResult, ...]
+def join(*sims: Union[List[SimulationResult], List[List[SimulationResult]], Tuple[SimulationResult, ...]]
          ) -> List[SimulationResult]:
     """A list of results with non-unique snapshots are combined accordingly to their snapshot.
 

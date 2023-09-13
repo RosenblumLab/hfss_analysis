@@ -25,7 +25,7 @@ class JointSimulationResults:
         return [r.to_flat_dict() for r in self.results], \
             snapshot_to_dict(self.constant_variables)
 
-    def save_to_csv(self, path: Path | str):
+    def save_to_csv(self, path: Union[Path, str]):
         data, constants = self._pack()
         # saving data
         df = pd.DataFrame(data)
