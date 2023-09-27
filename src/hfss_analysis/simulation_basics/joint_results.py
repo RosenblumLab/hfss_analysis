@@ -7,10 +7,10 @@ from pathlib import Path
 import json
 
 
-def json_save(path, data):
+def json_save(path, data, indent: int = 4):
     s = json.dumps(data)
     with open(path, 'w') as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=indent)
 
 
 @dataclass
