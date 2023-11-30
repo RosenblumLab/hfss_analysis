@@ -10,6 +10,15 @@ def add_units(value: Union[float, int], units: str) -> str:
     return f'{value}{units}'
 
 
+# @dataclass(frozen=True)
+# class ExpressionVaraible:
+#     name: str
+#     value: str
+#
+#     def to_name_and_value(self) -> Tuple[str, str]:
+#         return self.name, self.value
+
+
 @dataclass(frozen=True)
 class ValuedVariable:
     name: str
@@ -18,14 +27,6 @@ class ValuedVariable:
 
     def to_name_and_value(self) -> Tuple[str, str]:
         return self.name, add_units(self.value, self.unit)
-
-        # def __post_init__(self):
-    #     self.value = np.round(self.value, decimals = ROUNDING_DIGIT)
-    # display_name: Optional[str] = None
-
-    # def __post_init__(self):
-    #     if not self.display_name:
-    #         self.display_name = self.name
 
 
 def round_valued_variable(valued_var: ValuedVariable) -> ValuedVariable:

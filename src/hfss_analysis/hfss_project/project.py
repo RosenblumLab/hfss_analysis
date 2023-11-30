@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import pandas as pd
 import pyEPR as epr
-from typing import Dict, Tuple, Union, Iterable
+from typing import Dict, Tuple, Union, Iterable, Set, Optional
 from pathlib import Path
 from ..variables.variables import ValuedVariable
 from .variation_dict_helper import dict_to_valued_variables, construct_variables_to_variation, text_to_valued_variables
@@ -13,6 +13,9 @@ class Project:
     project_name: str  # file name
     design_name: str
     setup_name: str
+
+    # keeps records of variable names that are expression of other variables
+    depended_variables: Set[ValuedVariable] = field(init=False)
 
     _variation_dict: Dict[str, str] = None  # dict of variation
     # number to a string of all variables
@@ -35,21 +38,58 @@ class Project:
         self.setup = self.design.get_setup(self.setup_name)
         self._distributed_analysis = epr.DistributedAnalysis(self.pinfo)
 
+        # finding depended variables
+        self.construct_depended_variables()
+
     @property
     def distributed_analysis(self):
         self._distributed_analysis.update_ansys_info()
         return self._distributed_analysis
 
-    def set_variable(self, variable: ValuedVariable):
+    def construct_depended_variables(self):
+        # getting all variables without any variable
+        # that depends on other variables
+        all_variables_except_depended = self.get_all_variables()
+
+        # getting all variables
+        #   (including variables with expression as their value -
+        #   denoted as nominal variables. variable that are depended on
+        #   others will be evaluated)
+        nominal_variation = self.design.get_nominal_variation()
+        all_variables = text_to_valued_variables(nominal_variation)
+
+        # difference of all variables with all variable except depended variables
+        # will result in the depended part only
+        depended_variables_names = set(map(lambda x: x.name, all_variables)) - \
+                                  set(map(lambda x: x.name, all_variables_except_depended))
+
+
+        # convert names to valued_variable with expression as value (str)
+        dicts_of_variables = self._get_all_variables_as_dict()
+        depended_dict = {n: dicts_of_variables[n] for n in depended_variables_names}
+        depended_variables = tuple(map(lambda x: ValuedVariable(x[0], x[1], ''), depended_dict.items()))
+        self.depended_variables = depended_variables
+
+
+    def set_depended_variables(self):
+        self.set_variables(self.depended_variables, check_for_depended=False)
+
+    def set_variable(self, variable: ValuedVariable, check_for_depended: bool = True):
         name, value = variable.to_name_and_value()
+
+        # exclude changing depended variable
+        if check_for_depended and \
+                (name in set(map(lambda x: x.name, self.depended_variables))):
+            return
+
         if variable.name.startswith('$'):
             self.project.set_variable(name, value)
         else:
             self.design.set_variable(name, value)
 
-    def set_variables(self, variables: Iterable[ValuedVariable]):
+    def set_variables(self, variables: Iterable[ValuedVariable], check_for_depended: bool = True):
         for v in variables:
-            self.set_variable(v)
+            self.set_variable(v, check_for_depended=check_for_depended)
 
     def get_variable(self, name: str) -> str:
         if name.startswith('$'):
@@ -63,21 +103,22 @@ class Project:
             print('No solutions found')
 
     def get_all_variables(self) -> Tuple[ValuedVariable, ...]:
+        variable_dict = self._get_all_variables_as_dict()
+        # convert dict to list of valued variables
+        return dict_to_valued_variables(variable_dict)
+
+    def _get_all_variables_as_dict(self) -> Dict[str, str]:
         project_vars = self.project.get_variables()
         design_vars = self.design.get_variables()
-        all_vars_dict = dict(**project_vars, **design_vars)
-        # convert dict to list of valued variables
-        return dict_to_valued_variables(all_vars_dict)
+        return dict(**project_vars, **design_vars)
+
 
     def get_snapshot(self) -> Tuple[ValuedVariable, ...]:
         # USING NOMINAL
         text = self.design.get_nominal_variation()
         return text_to_valued_variables(text)
-        # project_vars = self.project.get_variables()
-        # design_vars = self.design.get_variables()
-        # all_vars_dict = dict(**project_vars, **design_vars)
-        # convert dict to list of valued variables
-        # return dict_to_valued_variables(all_vars_dict)
+        # # Switched back to all variables
+        # return self.get_all_variables()
 
     @property
     def variation_dict(self):

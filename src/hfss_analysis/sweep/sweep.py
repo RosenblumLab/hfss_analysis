@@ -11,7 +11,6 @@ class Sweep:
     project: Project
     variables: Iterable[Variable]
     strategy: str = 'product'
-    # results: Dict = field(default_factory=dict)
     _snapshots: List[Tuple[ValuedVariable]] = field(default_factory=list)
     _parameters: List[Tuple[ValuedVariable]] = field(default_factory=list)
     dynamic_names: Set = None
@@ -29,87 +28,6 @@ class Sweep:
         parameters_df = self._create_parameters_dataframe()
         self.results = pd.concat([parameters_df, df], axis=1)
 
-    # def make(self, project: Project, modules_names: Union[str, List[str]], modules_params_dict: Dict[str, Dict]):
-    #     # convert modules to list
-    #     if isinstance(modules_names, str):
-    #         modules_names = [modules_names]
-    #
-    #     # validate
-    #     validate_modules(modules_names)
-    #
-    #     # iterating over the modules and execute each one of them
-    #     for module_name in modules_names:
-    #
-    #         # getting the relevant parameters
-    #         params = modules_params_dict.get(module_name, {})
-    #
-    #         self._make_single(project, module_name, params)
-    #
-    #
-    # def _make_single(self, project: Project, module_name: str, params: Dict):
-    #     # iterate over all parameters
-    #
-    #     for hfss_parameters in self.make_unify_iterable():
-    #
-    #         # getting the module
-    #         module = SUPPORTED_MODULES[module_name]
-    #
-    #         # set hfss parameters
-    #
-    #         # get a snapshot
-    #
-    #         # execution
-    #         result = module(project, **params)
-    #
-    #         # saving the result in a dict
-    #         self.results[module_name] = result
-
-
-    # def make_classic(self):
-    #     # classic analysis
-    #     full_var_list = list(self.make_unify_iterable())
-    #     for i, variables in (pbar := tqdm(enumerate(full_var_list), total=len(full_var_list))):
-    #         pbar.set_description(f'Variation {i}')
-    #         # setting & logging all variables
-    #         log_info = '\n' + '#' * 20
-    #         for var in variables:
-    #             self.simulation.project.set_variable(var.name, var.value)
-    #             log_info += f'\nSetting {var.display_name}={var.value}'
-    #         log_info += '\n' + '#' * 20
-    #
-    #         epr.logger.info(log_info)
-    #
-    #         # analysing
-    #         self.simulation.analyze_classic()
-    #
-    #     # extracting all eigenmodes
-    #     variation_dict = self.simulation.get_variations_dict()
-    #     variation_iter = self.gen_variation_sequence(variation_dict)
-    #     # add new attribute to sweep and save iteraton as list
-    #     self._variations = list(variation_iter)
-    #     self.simulation.extract_all_eigenmodes(variation_iter=self._variations)
-    #
-    # def make_quantum(self):
-    #     # getting chi matrix and numerically-diagonalized (ND) frequencies
-    #     self.simulation.make_quantum(variations_iter=self._variations)
-
-    # def make_all(self, do_quantum=True):
-    #     # making simulations
-    #     self.make_classic()
-    #
-    #     if do_quantum:
-    #         self.make_quantum()
-    #
-    #         # getting results
-    #         self.results = self.simulation.concat_eigenmodes_chi_and_ND_freqs()
-    #
-    #     else:
-    #         self.results = self.simulation.eigenmodes
-    #
-    #     # adding parameters
-    #     self.add_parameters(self.results)
-    #
-    #     return self.results
     def clear(self):
         self._parameters = []
         self._snapshots = []

@@ -60,7 +60,9 @@ def dict_to_valued_variables(data: Dict[str, str]) -> Tuple[ValuedVariable, ...]
 
     def _helper():
         for k, v in data.items():
-            m = pattern.compiled.search(v)
+            m = pattern.compiled.match(v)
+            if not m:
+                continue
             yield dict_to_valued_variable({'name': k,
                                            **m.groupdict()})
 

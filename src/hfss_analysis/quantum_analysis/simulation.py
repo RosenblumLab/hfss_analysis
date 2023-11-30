@@ -42,14 +42,33 @@ class QuantumSimulation:
 
         self._clear()
         self._prepare_snapshots_and_variations(sweep, variation_chooser)
-        epra = self._prepare_quantum_analysis()
+        
+        self._analyze_variations()
+        # epra = self._prepare_quantum_analysis()
 
         # analysis of the given variations
-        results = epra.analyze_all_variations(cos_trunc=8, fock_trunc=15,
-                                              modes=self.modes, variations=self.variations)
+        # results = epra.analyze_all_variations(cos_trunc=8, fock_trunc=15,
+        #                                       modes=self.modes, variations=self.variations)
+        
         self.results = list(results.values())
         return [SimulationResult(result=result, snapshot=snapshot)
                 for snapshot, result in zip(self.snapshots, self.results)]
+    
+    
+    def _analyze_variations(self):
+        try:
+            # preparation of epra
+            epra = self._prepare_quantum_analysis()
+
+            # analysis of the given variations
+            results = epra.analyze_all_variations(cos_trunc=8, fock_trunc=15,
+                                                  modes=self.modes, variations=self.variations)
+        except Exception as e:
+            raise e
+        
+        finally:
+            # the analysis modify the expression of all design variables, change them back after done
+            self.project.set_depended_variables()
 
 
 def analyze(project: Project, modes: List[int], sweep: Optional[Sweep] = None,
