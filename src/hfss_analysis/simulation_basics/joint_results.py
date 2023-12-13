@@ -21,9 +21,9 @@ def _remove_extention_from_path(path: Path):
 
 
 def _normalize_input_to_path(path_input: Union[str, Path]) -> Path:
-    if type(path_input) is str:
+    if isinstance(path_input, str):
         return Path(path_input)
-    elif type(path_input) is Path:
+    elif isinstance(path_input, Path):
         return path_input
     else:
         raise TypeError(f'Expected to get either string or pathlib.Path instance, however got type: '
