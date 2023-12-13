@@ -1,10 +1,12 @@
-from dataclasses import dataclass, asdict
-from typing import Dict, Tuple, Any, List, Union
-from ..variables.variables import ValuedVariable, snapshot_to_dict
-from .simulation_result import SimulationResult
-import pandas as pd
-from pathlib import Path
 import json
+from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Dict, Tuple, List, Union
+
+import pandas as pd
+
+from .simulation_result import SimulationResult
+from ..variables.variables import ValuedVariable, snapshot_to_dict
 
 
 def json_save(path, data, indent: int = 4):
@@ -29,11 +31,11 @@ def _normalize_input_to_path(path_input: Union[str, Path]) -> Path:
         raise TypeError(f'Expected to get either string or pathlib.Path instance, however got type: '
                         f'{type(path_input)}')
 
+
 def process_path(path: Union[str, Path]):
     path = _normalize_input_to_path(path)
     path = _remove_extention_from_path(path)
     return path
-
 
 
 @dataclass
@@ -51,7 +53,8 @@ class JointSimulationResults:
     def save_to_csv(self, path: Union[Path, str]):
         # packing data
         data, constants = self._pack()
-        # processig path
+        # processing path (type checking and make it to return the
+        #                   path as Path object without suffix)
         path = process_path(path)
 
         # saving data
