@@ -34,7 +34,9 @@ class QuantumSimulation:
 
     def _prepare_quantum_analysis(self) -> epr.QuantumAnalysis:
 
-        data_file, _ = self.project.distributed_analysis.do_EPR_analysis(modes=self.modes, variations=self.variations)
+        data_file, _ = self.project.distributed_analysis.do_EPR_analysis(modes=self.modes,
+                                                                         variations=self.variations,
+                                                                         append_analysis=False)
         return epr.QuantumAnalysis(data_file)
 
     def analysis(self, sweep: Optional[Sweep] = None,
