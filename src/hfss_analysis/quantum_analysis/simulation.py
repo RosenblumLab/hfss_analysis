@@ -57,7 +57,8 @@ class QuantumSimulation:
 
             # analysis of the given variations
             results = epra.analyze_all_variations(cos_trunc=8, fock_trunc=15,
-                                                  modes=self.modes, variations=self.variations,
+                                                  # modes=list(range(len(self.modes))),
+                                                  variations=self.variations,
                                                   analyze_previous=True)
         except Exception as e:
             raise e
