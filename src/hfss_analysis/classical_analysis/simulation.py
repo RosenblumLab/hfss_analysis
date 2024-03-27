@@ -1,4 +1,5 @@
 from typing import Optional, Dict, List
+from tqdm import tqdm
 from ..sweep import Sweep
 from ..hfss_project import Project
 from ..simulation_basics import SimulationResult
@@ -27,7 +28,9 @@ class ClassicalSimulation:
         # clearing memory of snapshots and results
         self._clear()
 
-        for snapshot in self._generate_snapshots(sweep):
+        for snapshot in tqdm(self._generate_snapshots(sweep),
+                             desc="Running classical simulations",
+                             total=len(sweep.parameters)):
 
             self.snapshots.append(snapshot)
 

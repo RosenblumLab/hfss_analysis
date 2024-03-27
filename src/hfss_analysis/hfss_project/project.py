@@ -67,9 +67,8 @@ class Project:
         # convert names to valued_variable with expression as value (str)
         dicts_of_variables = self._get_all_variables_as_dict()
         depended_dict = {n: dicts_of_variables[n] for n in depended_variables_names}
-        depended_variables = tuple(map(lambda x: ValuedVariable(x[0], x[1], ''), depended_dict.items()))
+        depended_variables = set(map(lambda x: ValuedVariable(x[0], x[1], ''), depended_dict.items()))
         self.depended_variables = depended_variables
-
 
     def set_depended_variables(self):
         self.set_variables(self.depended_variables, check_for_depended=False)
@@ -100,7 +99,7 @@ class Project:
         try:
             self.design.delete_full_variation()
         except Exception as e:
-            print('No solutions found')
+            print(f'No solutions found - {e}')
 
     def get_all_variables(self) -> Tuple[ValuedVariable, ...]:
         variable_dict = self._get_all_variables_as_dict()
@@ -111,7 +110,6 @@ class Project:
         project_vars = self.project.get_variables()
         design_vars = self.design.get_variables()
         return dict(**project_vars, **design_vars)
-
 
     def get_snapshot(self) -> Tuple[ValuedVariable, ...]:
         # USING NOMINAL
