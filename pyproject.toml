@@ -23,6 +23,7 @@ dependencies = [
     "pandas",
     "pytest",
     "tqdm",
-    "pywin32"
+    "pywin32",
+    "pyepr-quantum>=0.8.5.7"
 ]
 
