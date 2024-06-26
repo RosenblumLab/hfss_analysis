@@ -2,6 +2,8 @@ from typing import Dict, Tuple, List, Iterable
 import pandas as pd
 from itertools import combinations_with_replacement
 from ..simulation_basics import SimulationResult
+import numpy as np
+from numpy.typing import NDArray
 
 
 class Constants:
@@ -9,12 +11,12 @@ class Constants:
     COUPLING = 'Coupling'
 
 
-def _get_chis(data: Dict) -> pd.DataFrame:
-    return data['chi_ND']
+def _get_chis(data: Dict) -> NDArray:
+    return np.real(data['chi_ND'])
 
 
-def _get_frequencies(data: Dict) -> pd.Series:
-    return data['f_ND']
+def _get_frequencies(data: Dict) -> NDArray:
+    return np.real(data['f_ND'])
 
 
 def _sequential_mode_to_label(modes_to_labels: Dict[int, str]) -> Dict[int, str]:
@@ -26,7 +28,7 @@ def _sequential_mode_to_label(modes_to_labels: Dict[int, str]) -> Dict[int, str]
     return {i: modes_to_labels[k] for i, k in enumerate(modes_to_labels.keys())}
 
 
-def _flatten_chis(chis: pd.DataFrame) -> Dict[Tuple[int, int], float]:
+def _flatten_chis(chis: NDArray) -> Dict[Tuple[int, int], float]:
     """
     Assuming the chi matrix is a symmetric matrix, hence we only want 2-combinations
     with replacements
@@ -57,7 +59,7 @@ def _apply_mode_to_label_on_flatten_chi(flat_chi: Dict[Tuple[int, int], float],
     return {_format_key(k): v for k, v in flat_chi.items()}
 
 
-def _format_frequencies(frequencies: pd.Series, modes_to_labels: Dict[int, str]) -> Dict[str, float]:
+def _format_frequencies(frequencies: NDArray, modes_to_labels: Dict[int, str]) -> Dict[str, float]:
 
     def _format_value(freq: float):
         return freq / 1e3

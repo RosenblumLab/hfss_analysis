@@ -60,6 +60,7 @@ class QuantumSimulation:
                                                   # modes=list(range(len(self.modes))),
                                                   variations=self.variations,
                                                   analyze_previous=True)
+
         except Exception as e:
             raise e
 

@@ -21,6 +21,7 @@ class Pattern:
 VALUE_PATTERN = r'(?P<value>[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)'
 NAME_PATTERN = r'(?P<name>[\w\$_\d]+)'
 UNIT_PATTERN = r'(?P<unit>\w*)'
+SPLIT_PATTERN = r'[-+\/*()]+'
 PATTERN_FOR_VARIATION = Pattern(rf"{NAME_PATTERN}='{VALUE_PATTERN}{UNIT_PATTERN}'")
 
 
@@ -56,11 +57,15 @@ def text_to_valued_variables(text: str) -> Tuple[ValuedVariable, ...]:
 
 def dict_to_valued_variables(data: Dict[str, str]) -> Tuple[ValuedVariable, ...]:
 
-    pattern = Pattern(f'{VALUE_PATTERN}{UNIT_PATTERN}')
+    pattern = Pattern(f'^\s*{VALUE_PATTERN}{UNIT_PATTERN}\s*$')
+    split_pattern = Pattern(f'{SPLIT_PATTERN}')
 
     def _helper():
         for k, v in data.items():
+            # clauses = split_pattern.compiled.split(v)
+            # matches = list(map(lambda x: pattern.compiled.match(x), clauses))
             m = pattern.compiled.match(v)
+            # if None in matches:
             if not m:
                 continue
             yield dict_to_valued_variable({'name': k,
