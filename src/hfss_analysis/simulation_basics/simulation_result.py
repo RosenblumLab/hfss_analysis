@@ -19,14 +19,14 @@ class SimulationResult:
             return self.result
 
     def to_flat_dict(self):
-        return _merge_two_dicts(self.result, snapshot_to_dict(self.snapshot))
+        return _merge_two_dicts(snapshot_to_dict(self.snapshot), self.result)
 
     def save_to_json(self, path: Union[Path, str], with_snapshot: bool = True):
         with open(Path(path).with_suffix('.json'), 'w') as json_file:
             json.dump(self.to_dict(with_snapshot=with_snapshot), json_file, indent=4)
 
 
-def _merge_two_dicts(dict_a: Dict, dict_b: Dict):
+def _merge_two_dicts(dict_a: Dict[str, Any], dict_b: Dict[str, Any]):
     return dict(**dict_a, **dict_b)
 
 

@@ -63,7 +63,7 @@ def round_and_sort_valued_variables(valued_vars: Iterable[ValuedVariable]) -> Tu
 
 
 def snapshot_to_dict(snapshot: Tuple[ValuedVariable, ...]) -> Dict[str, float]:
-    return {f'{v.name} {v.unit}': v.value for v in snapshot}
+    return {f'{v.name} ({v.unit})': v.value for v in snapshot}
 
 # def sort_and_round_valued_vars(valued_vars: Iterable[ValuedVariable]) -> Tuple[ValuedVariable, ...]:
 #     return sort_valued_variables(round_valued_variables(valued_vars))

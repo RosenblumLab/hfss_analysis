@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Tuple, List, Iterable, Union, Dict, Set
+from typing import Tuple, List, Iterable, Dict, Set, Literal
 import pandas as pd
 from itertools import product
 from ..hfss_project import Project
@@ -10,16 +10,17 @@ from ..variables.variables import ValuedVariable, round_and_sort_valued_variable
 class Sweep:
     project: Project
     variables: Iterable[Variable]
-    strategy: str = 'product'
+    strategy: Literal['product', 'zip'] = 'product'
     _snapshots: List[Tuple[ValuedVariable]] = field(default_factory=list)
     _parameters: List[Tuple[ValuedVariable]] = field(default_factory=list)
     dynamic_names: Set = None
     constant_parameters: Dict = field(default_factory=dict)
+    results: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def _create_parameters_dataframe(self) -> pd.DataFrame:
 
         def _parse(variables: Iterable[ValuedVariable]) -> Dict[str, str]:
-            return {var.display_name: var.value for var in variables}
+            return {var.name: var.value for var in variables}
 
         result = [_parse(variables) for variables in self.make_unify_iterable()]
         return pd.DataFrame(result)
