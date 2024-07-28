@@ -33,12 +33,15 @@ class ClassicalSimulation:
 
             self.project.analyze()
 
-            # getting results
-            self.results.append(self.project.get_analysis_results(snapshot))
+            # getting results if its eigenmode setup
+            if self.project.is_eigenmode:
+                self.results.append(self.project.get_analysis_results(snapshot))
 
         return self._results_to_dict()
 
     def _results_to_dict(self) -> List[SimulationResult]:
+        if self.results == []:
+            return []
         return [SimulationResult(result=result.to_dict(),
                                  snapshot=snapshot)
                 for snapshot, result in zip(self.snapshots, self.results)]

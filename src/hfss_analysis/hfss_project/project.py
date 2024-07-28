@@ -41,6 +41,9 @@ class Project:
         # finding depended variables
         self.construct_depended_variables()
 
+        # is eigenmode
+        self.is_eigenmode: bool = isinstance(self.setup, epr.ansys.HfssEMSetup)
+
     @property
     def distributed_analysis(self):
         self._distributed_analysis.update_ansys_info()
