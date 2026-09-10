@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Iterable, Union, Optional, Tuple, Dict
 import numpy as np
 
-ROUNDING_DIGIT = 10
+ROUNDING_DIGIT = 13
 
 
 def add_units(value: Union[float, int], units: str) -> str:
